@@ -6,4 +6,6 @@
     <string name="text_sign_in_button">Sign In</string>
     <string name="text_sign_up_button">Sign Up</string>
     <string name="text_view_register">Register</string>
+    <string name="text_view_go_to_profile">Pick a profile photo</string>
+    <string name="hint_username">Username</string>
 </resources>

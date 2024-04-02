@@ -81,6 +81,21 @@
                 android:gravity="center">
 
                 <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/sign_up_input_username"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="@string/hint_username"
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                    app:endIconMode="clear_text">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="text"/>
+
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.textfield.TextInputLayout
                     android:id="@+id/sign_up_input_email"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -135,8 +150,54 @@
                     android:background="@drawable/button_background"
                     android:layout_marginTop="15dp"/>
 
-                <TextView android:id="@+id/text_view_sign_in"
-                    android:text="@string/text_sign_in_button"
+                <androidx.appcompat.widget.LinearLayoutCompat
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_horizontal">
+
+                    <TextView android:id="@+id/text_view_sign_in"
+                        android:text="@string/text_sign_in_button"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="15dp"
+                        android:background="?attr/selectableItemBackgroundBorderless"
+                        android:textColor="@android:color/holo_blue_light"/>
+
+                    <TextView android:id="@+id/text_view_go_to_profile"
+                        android:text="@string/text_view_go_to_profile"
+                        android:layout_marginStart="10dp"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="15dp"
+                        android:background="?attr/selectableItemBackgroundBorderless"
+                        android:textColor="@android:color/holo_blue_light"/>
+
+                </androidx.appcompat.widget.LinearLayoutCompat>
+
+            </androidx.appcompat.widget.LinearLayoutCompat>
+
+            <androidx.appcompat.widget.LinearLayoutCompat
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:gravity="center_horizontal">
+
+                <com.mikhaellopez.circularimageview.CircularImageView
+                    android:layout_width="150dp"
+                    android:layout_height="150dp"
+                    android:src="@drawable/ic_profile"
+                    app:civ_border_color="#3f51b5"
+                    app:civ_border_width="4dp"
+                    app:civ_shadow="true"
+                    app:civ_shadow_radius="10dp"
+                    app:civ_shadow_color="#3f51b5"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:clickable="true"
+                    android:focusable="true"/>
+
+                <TextView android:id="@+id/text_view_sign_up"
+                    android:text="@string/text_sign_up_button"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="15dp"
@@ -144,7 +205,6 @@
                     android:textColor="@android:color/holo_blue_light"/>
 
             </androidx.appcompat.widget.LinearLayoutCompat>
-
         </ViewFlipper>
 
     </androidx.appcompat.widget.LinearLayoutCompat>
