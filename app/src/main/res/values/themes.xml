@@ -6,4 +6,10 @@
     </style>
 
     <style name="Theme.ChatApp" parent="Base.Theme.ChatApp" />
+
+    <style name="MyTheme" parent = "Base.Theme.ChatApp">
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+        <item name="android:statusBarColor">@android:color/white</item>
+    </style>
 </resources>
