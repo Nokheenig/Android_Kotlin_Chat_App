@@ -6,6 +6,7 @@ import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
+import android.view.View
 import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
@@ -78,12 +79,18 @@ class MainActivity : AppCompatActivity() {
             Toast.makeText(this, "You should provide an email and a password", Toast.LENGTH_LONG).show()
             return
         }
+
+        mBinding.progressBar1.visibility = View.VISIBLE
+
         FirebaseAuth.getInstance().signInWithEmailAndPassword(email,password)
             .addOnCompleteListener(this){task ->
                 if (task.isSuccessful) {
                     Toast.makeText(this, "User signed in", Toast.LENGTH_LONG).show()
+                    mBinding.progressBar1.visibility = View.GONE
+                    sendToActivity()
                 } else {
                     Toast.makeText(this, "Couldn't sign in\nSomething went wrong.", Toast.LENGTH_LONG).show()
+                    mBinding.progressBar1.visibility = View.GONE
                 }
             }
     }
@@ -114,49 +121,51 @@ class MainActivity : AppCompatActivity() {
             return
         }
 
+        mBinding.progressBar2.visibility = View.VISIBLE
+
         FirebaseAuth.getInstance().createUserWithEmailAndPassword(email,password)
-            .addOnCompleteListener(this){ task ->
-                if (task.isSuccessful) {
-                    Toast.makeText(this, "Account created", Toast.LENGTH_LONG).show()
-
-                    if (task.isComplete){
-                        if (this::uri.isInitialized) {
-                            val filePath = storageRef.child("profile_images").child(uri.lastPathSegment!!)
-                            filePath.putFile(uri).addOnSuccessListener {task ->
-                                Log.d("dBug", "Adding the profile picture succeeded : ${task}")
-                                val result : Task<Uri> = task.metadata?.reference?.downloadUrl!!
-                                result.addOnSuccessListener {
-                                    uri = it
-                                }
-
-                                val user = User(
-                                    username,
-                                    uri.toString(),
-                                    FirebaseAuth.getInstance().currentUser?.uid!!
-                                )
-                                usersRef.document()
-                                    .set(user)
-                                    .addOnSuccessListener {
-                                        Toast.makeText(this@MainActivity, "Account created", Toast.LENGTH_LONG).show()
-                                        sendToActivity()
-                                    }.addOnFailureListener {
-                                        Toast.makeText(this@MainActivity, "Account wasn't created", Toast.LENGTH_LONG).show()
-                                    }
-                            }.addOnFailureListener {
-                                Log.d("dBug", "Adding the profile picture to the storage failed : ${it}")
-                            }
+        .addOnCompleteListener(this){ task ->
+            if (task.isSuccessful) {
+                Toast.makeText(this, "Account created", Toast.LENGTH_LONG).show()
+                var user: User? = null
+                if (this::uri.isInitialized) {
+                    val filePath = storageRef.child("profile_images").child(uri.lastPathSegment!!)
+                    filePath.putFile(uri).addOnSuccessListener {task ->
+                        Log.d("dBug", "Adding the profile picture succeeded : ${task}")
+                        val result : Task<Uri> = task.metadata?.reference?.downloadUrl!!
+                        result.addOnSuccessListener {
+                            uri = it
                         }
 
-                    } else {
-                        Log.d("dBug", "Task(Account creation) was not complete")
+                        user = User(
+                            username,
+                            uri.toString(),
+                            FirebaseAuth.getInstance().currentUser?.uid!!
+                        )
                     }
-
                 } else {
-                    Toast.makeText(this, "The account wasn't created:\n${task.exception}", Toast.LENGTH_LONG).show()
+                    user = User(
+                        username,
+                        "",
+                        FirebaseAuth.getInstance().currentUser?.uid!!
+                    )
                 }
+                user?.let {
+                    usersRef.document()
+                        .set(it)
+                        .addOnSuccessListener {
+                            Toast.makeText(this@MainActivity, "Account created", Toast.LENGTH_LONG).show()
+                            mBinding.progressBar2.visibility = View.GONE
+                            sendToActivity()
+                        }.addOnFailureListener {
+                            Toast.makeText(this@MainActivity, "Account wasn't created", Toast.LENGTH_LONG).show()
+                            mBinding.progressBar2.visibility = View.GONE
+                        }
+                }
+            } else {
+                Toast.makeText(this, "The account wasn't created:\n${task.exception}", Toast.LENGTH_LONG).show()
             }
-
-
+        }
     }
 
     private fun startNextAnimation() {
