@@ -2,6 +2,7 @@ package com.example.chatapp
 
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
@@ -12,15 +13,29 @@ import androidx.appcompat.app.AlertDialog
 import androidx.core.app.ActivityCompat
 import androidx.databinding.DataBindingUtil
 import com.example.chatapp.databinding.ActivityMainBinding
+import com.example.chatapp.model.User
+import com.example.chatapp.ui.ChatActivity
+import com.google.android.gms.tasks.Task
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.CollectionReference
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.storage.FirebaseStorage
+import com.google.firebase.storage.StorageReference
 
 class MainActivity : AppCompatActivity() {
     private lateinit var mBinding: ActivityMainBinding
     private lateinit var getResult: ActivityResultLauncher<Intent>
     private val STORAGE_REQUEST_CODE = 1293487
+    private lateinit var uri: Uri
+    private lateinit var storageRef: StorageReference
+    private val db: FirebaseFirestore = FirebaseFirestore.getInstance()
+    private val usersRef : CollectionReference = db.collection("users_collection")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         mBinding = DataBindingUtil.setContentView(this,R.layout.activity_main)
+
+        storageRef = FirebaseStorage.getInstance().reference
+
         mBinding.signInButton.setOnClickListener {
             signIn()
         }
@@ -51,6 +66,7 @@ class MainActivity : AppCompatActivity() {
         getResult = registerForActivityResult(ActivityResultContracts.StartActivityForResult()){
             if (it.resultCode == RESULT_OK) {
                 mBinding.profileImage.setImageURI(it.data?.data)
+                uri = it.data?.data!!
             }
         }
     }
@@ -76,9 +92,15 @@ class MainActivity : AppCompatActivity() {
         val email = mBinding.signUpInputEmail.editText?.text.toString().trim()
         val password = mBinding.signUpInputPassword.editText?.text.toString().trim()
         val confirmPassword = mBinding.signUpInputConfirmPassword.editText?.text.toString().trim()
+        val username = mBinding.signUpInputUsername.editText?.text.toString().trim()
 
         if (email.isEmpty() || password.isEmpty() || confirmPassword.isEmpty()) {
             Toast.makeText(this, "You should provide an email and a password", Toast.LENGTH_LONG).show()
+            return
+        }
+
+        if (username.isEmpty()) {
+            Toast.makeText(this, "You should provide a username", Toast.LENGTH_LONG).show()
             return
         }
 
@@ -87,14 +109,54 @@ class MainActivity : AppCompatActivity() {
             return
         }
 
+        if (password.length <= 6) {
+            Toast.makeText(this, "Passwords should have more than 6 characters", Toast.LENGTH_LONG).show()
+            return
+        }
+
         FirebaseAuth.getInstance().createUserWithEmailAndPassword(email,password)
             .addOnCompleteListener(this){ task ->
                 if (task.isSuccessful) {
                     Toast.makeText(this, "Account created", Toast.LENGTH_LONG).show()
+
+                    if (task.isComplete){
+                        if (this::uri.isInitialized) {
+                            val filePath = storageRef.child("profile_images").child(uri.lastPathSegment!!)
+                            filePath.putFile(uri).addOnSuccessListener {task ->
+                                Log.d("dBug", "Adding the profile picture succeeded : ${task}")
+                                val result : Task<Uri> = task.metadata?.reference?.downloadUrl!!
+                                result.addOnSuccessListener {
+                                    uri = it
+                                }
+
+                                val user = User(
+                                    username,
+                                    uri.toString(),
+                                    FirebaseAuth.getInstance().currentUser?.uid!!
+                                )
+                                usersRef.document()
+                                    .set(user)
+                                    .addOnSuccessListener {
+                                        Toast.makeText(this@MainActivity, "Account created", Toast.LENGTH_LONG).show()
+                                        sendToActivity()
+                                    }.addOnFailureListener {
+                                        Toast.makeText(this@MainActivity, "Account wasn't created", Toast.LENGTH_LONG).show()
+                                    }
+                            }.addOnFailureListener {
+                                Log.d("dBug", "Adding the profile picture to the storage failed : ${it}")
+                            }
+                        }
+
+                    } else {
+                        Log.d("dBug", "Task(Account creation) was not complete")
+                    }
+
                 } else {
                     Toast.makeText(this, "The account wasn't created:\n${task.exception}", Toast.LENGTH_LONG).show()
                 }
             }
+
+
     }
 
     private fun startNextAnimation() {
@@ -154,5 +216,9 @@ class MainActivity : AppCompatActivity() {
         } else {
             Toast.makeText(this@MainActivity, "Permission not granted", Toast.LENGTH_LONG).show()
         }
+    }
+
+    private fun sendToActivity(){
+        startActivity(Intent(this@MainActivity, ChatActivity::class.java))
     }
 }
