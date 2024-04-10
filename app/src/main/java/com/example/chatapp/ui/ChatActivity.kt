@@ -19,6 +19,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.DocumentChange
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.toObject
 
 class ChatActivity : AppCompatActivity() {
@@ -52,7 +53,7 @@ class ChatActivity : AppCompatActivity() {
     override fun onStart() {
         super.onStart()
 
-        messagesRef.addSnapshotListener { snapshots, error ->
+        messagesRef.orderBy("timeStamp", Query.Direction.ASCENDING).addSnapshotListener { snapshots, error ->
             error?.let{
                 return@addSnapshotListener
             }
@@ -69,6 +70,7 @@ class ChatActivity : AppCompatActivity() {
                             val message = snapshot.toObject(ChatMessage::class.java)
                             messages.add(newIndex, message)
                             messagesAdaptor.notifyItemInserted(newIndex) // <- This is gonna add an animation whenever we add a new message
+                            messagesRecyclerView.smoothScrollToPosition(messages.size - 1)
                         }
                         DocumentChange.Type.REMOVED -> {
 
