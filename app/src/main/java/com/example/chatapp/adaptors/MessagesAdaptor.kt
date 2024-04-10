@@ -1,14 +1,20 @@
 package com.example.chatapp.adaptors
 
 import android.content.Context
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import android.widget.Toast
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.example.chatapp.R
 import com.example.chatapp.model.ChatMessage
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.storage.FirebaseStorage
+import com.google.firebase.storage.StorageReference
 import com.mikhaellopez.circularimageview.CircularImageView
 import com.squareup.picasso.Picasso
 
@@ -38,10 +44,42 @@ class MessagesAdaptor (
             holder.textViewMessage.text = message.message
         } else if (holder is SenderViewHolder) {
             holder.textViewSender.text = message.message
-            Picasso.get()
-                .load(message.sender.profileImage)
-                .placeholder(R.drawable.ic_profile)
-                .into(holder.senderProfileImage)
+            //if (message.sender.profileImage.isEmpty()){
+            //    holder.senderProfileImage.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_profile))
+            //} else {
+            /*
+            val imagePath = if(message.sender.profileImage.isEmpty()) null else message.sender.profileImage
+            val storageRef : StorageReference = FirebaseStorage.getInstance().reference
+            val imageRef = storageRef.child(imagePath!!)
+            imageRef.downloadUrl.addOnSuccessListener { taskUri ->
+                Log.d("test", "banana ${taskUri}")
+                Toast.makeText(context, "banana ${taskUri}", Toast.LENGTH_SHORT).show()
+                Picasso.get()
+                    .load(taskUri)
+                    .placeholder(R.drawable.ic_profile)
+                    .into(holder.senderProfileImage)
+            }.addOnFailureListener {
+                Picasso.get()
+                    .load(imagePath.toString())
+                    .placeholder(R.drawable.ic_profile)
+                    .into(holder.senderProfileImage)
+            }
+             */
+
+
+            //}
+            if (message.sender.profileImage.isEmpty()){
+                //holder.senderProfileImage.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_profile))
+                holder.senderProfileImage.setImageResource(R.drawable.ic_profile)
+            } else {
+                Log.d("test", "Image Uri ${message.sender.profileImage}")
+                Toast.makeText(context, "Image Uri ${message.sender.profileImage}", Toast.LENGTH_SHORT).show()
+                Picasso.get()
+                    .load(message.sender.profileImage)
+                    .placeholder(R.drawable.ic_profile)
+                    .into(holder.senderProfileImage)
+            }
+
         } else {
 
         }
@@ -67,6 +105,6 @@ class MessagesAdaptor (
 
     inner class  SenderViewHolder(view: View): RecyclerView.ViewHolder(view) {
         val textViewSender: TextView = view.findViewById(R.id.text_view_sender)
-        val senderProfileImage: CircularImageView = view.findViewById(R.id.text_view_sender)
+        val senderProfileImage: CircularImageView = view.findViewById(R.id.sender_profile_image)
     }
 }

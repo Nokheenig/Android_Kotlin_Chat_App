@@ -22,6 +22,7 @@ import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.StorageReference
+import kotlinx.coroutines.delay
 
 class MainActivity : AppCompatActivity() {
     private lateinit var mBinding: ActivityMainBinding
@@ -127,41 +128,92 @@ class MainActivity : AppCompatActivity() {
         .addOnCompleteListener(this){ task ->
             if (task.isSuccessful) {
                 Toast.makeText(this, "Account created", Toast.LENGTH_LONG).show()
-                var user: User? = null
+                //var user: User? = null
                 if (this::uri.isInitialized) {
                     val filePath = storageRef.child("profile_images").child(uri.lastPathSegment!!)
-                    filePath.putFile(uri).addOnSuccessListener {task ->
-                        Log.d("dBug", "Adding the profile picture succeeded : ${task}")
-                        val result : Task<Uri> = task.metadata?.reference?.downloadUrl!!
-                        result.addOnSuccessListener {
-                            uri = it
+                    filePath.putFile(uri).addOnCompleteListener { pictureUploadTask ->
+                        if (pictureUploadTask.isSuccessful){
+                            Log.d("dBug", "Adding the profile picture succeeded : ${pictureUploadTask}")
+                            val result : Task<Uri> = pictureUploadTask.result.metadata?.reference?.downloadUrl!!
+                            result.addOnSuccessListener {
+                                uri = it
+                            }
+
+                            val user = User(
+                                username,
+                                uri.toString(),
+                                FirebaseAuth.getInstance().currentUser?.uid!!
+                            )
+
+                            Toast.makeText(this@MainActivity, "Adding User in database...", Toast.LENGTH_SHORT).show()
+                            usersRef.document()
+                                .set(user)
+                                .addOnSuccessListener {
+                                    Toast.makeText(this@MainActivity, "User successfully added in database", Toast.LENGTH_LONG).show()
+                                    mBinding.progressBar2.visibility = View.GONE
+                                    sendToActivity()
+                                }.addOnFailureListener {
+                                    Toast.makeText(this@MainActivity, "User database insertion failed.", Toast.LENGTH_LONG).show()
+                                    mBinding.progressBar2.visibility = View.GONE
+                                }
+                        } else {
+                            Toast.makeText(this@MainActivity, "Adding the profile picture failed : ${pictureUploadTask}", Toast.LENGTH_SHORT).show()
+                            val user = User(
+                                username,
+                                "",
+                                FirebaseAuth.getInstance().currentUser?.uid!!
+                            )
+
+                            Toast.makeText(this@MainActivity, "Adding User in database...", Toast.LENGTH_SHORT).show()
+                            usersRef.document()
+                                .set(user)
+                                .addOnSuccessListener {
+                                    Toast.makeText(this@MainActivity, "User successfully added in database", Toast.LENGTH_LONG).show()
+                                    mBinding.progressBar2.visibility = View.GONE
+                                    sendToActivity()
+                                }.addOnFailureListener {
+                                    Toast.makeText(this@MainActivity, "User database insertion failed.", Toast.LENGTH_LONG).show()
+                                    mBinding.progressBar2.visibility = View.GONE
+                                }
                         }
 
-                        user = User(
-                            username,
-                            uri.toString(),
-                            FirebaseAuth.getInstance().currentUser?.uid!!
-                        )
                     }
                 } else {
-                    user = User(
+                    val user = User(
                         username,
                         "",
                         FirebaseAuth.getInstance().currentUser?.uid!!
                     )
-                }
-                user?.let {
+
+                    Toast.makeText(this@MainActivity, "Adding User in database...", Toast.LENGTH_SHORT).show()
                     usersRef.document()
-                        .set(it)
+                        .set(user)
                         .addOnSuccessListener {
-                            Toast.makeText(this@MainActivity, "Account created", Toast.LENGTH_LONG).show()
+                            Toast.makeText(this@MainActivity, "User successfully added in database", Toast.LENGTH_LONG).show()
                             mBinding.progressBar2.visibility = View.GONE
                             sendToActivity()
                         }.addOnFailureListener {
-                            Toast.makeText(this@MainActivity, "Account wasn't created", Toast.LENGTH_LONG).show()
+                            Toast.makeText(this@MainActivity, "User database insertion failed.", Toast.LENGTH_LONG).show()
                             mBinding.progressBar2.visibility = View.GONE
                         }
                 }
+                /*
+                user?.let {
+                    Toast.makeText(this@MainActivity, "Adding User in database...", Toast.LENGTH_SHORT).show()
+                    usersRef.document()
+                        .set(it)
+                        .addOnSuccessListener {
+                            Toast.makeText(this@MainActivity, "User successfully added in database", Toast.LENGTH_LONG).show()
+                            mBinding.progressBar2.visibility = View.GONE
+                            sendToActivity()
+                        }.addOnFailureListener {
+                            Toast.makeText(this@MainActivity, "User database insertion failed.", Toast.LENGTH_LONG).show()
+                            mBinding.progressBar2.visibility = View.GONE
+                        }
+                } ?: run {
+                    Toast.makeText(this@MainActivity, "User not initialized, cannot insert in database.", Toast.LENGTH_SHORT).show()
+                }
+                 */
             } else {
                 Toast.makeText(this, "The account wasn't created:\n${task.exception}", Toast.LENGTH_LONG).show()
             }
