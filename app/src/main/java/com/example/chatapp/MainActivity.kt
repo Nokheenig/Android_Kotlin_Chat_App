@@ -133,31 +133,35 @@ class MainActivity : AppCompatActivity() {
                     val filePath = storageRef.child("profile_images").child(uri.lastPathSegment!!)
                     filePath.putFile(uri).addOnCompleteListener { pictureUploadTask ->
                         if (pictureUploadTask.isSuccessful){
-                            Log.d("dBug", "Adding the profile picture succeeded : ${pictureUploadTask}")
-                            val result : Task<Uri> = pictureUploadTask.result.metadata?.reference?.downloadUrl!!
-                            result.addOnSuccessListener {
-                                uri = it
-                            }
-
-                            val user = User(
-                                username,
-                                uri.toString(),
-                                FirebaseAuth.getInstance().currentUser?.uid!!
-                            )
-
-                            Toast.makeText(this@MainActivity, "Adding User in database...", Toast.LENGTH_SHORT).show()
-                            usersRef.document()
-                                .set(user)
-                                .addOnSuccessListener {
-                                    Toast.makeText(this@MainActivity, "User successfully added in database", Toast.LENGTH_LONG).show()
-                                    mBinding.progressBar2.visibility = View.GONE
-                                    sendToActivity()
-                                }.addOnFailureListener {
-                                    Toast.makeText(this@MainActivity, "User database insertion failed.", Toast.LENGTH_LONG).show()
-                                    mBinding.progressBar2.visibility = View.GONE
+                            // Uploading the profile picture succeeded
+                            pictureUploadTask.result.storage.downloadUrl.addOnCompleteListener {
+                                val profilePicUrl = if (it.isSuccessful){
+                                    // Retrieving profile picture downloardUrl succeeded
+                                    it.result.toString()
+                                }else{
+                                    ""
                                 }
+
+                                val user = User(
+                                    username,
+                                    profilePicUrl,
+                                    FirebaseAuth.getInstance().currentUser?.uid!!
+                                )
+
+                                Toast.makeText(this@MainActivity, "Adding User in database...", Toast.LENGTH_SHORT).show()
+                                usersRef.document()
+                                    .set(user)
+                                    .addOnSuccessListener {
+                                        Toast.makeText(this@MainActivity, "User successfully added in database", Toast.LENGTH_LONG).show()
+                                        mBinding.progressBar2.visibility = View.GONE
+                                        sendToActivity()
+                                    }.addOnFailureListener {
+                                        Toast.makeText(this@MainActivity, "User database insertion failed.", Toast.LENGTH_LONG).show()
+                                        mBinding.progressBar2.visibility = View.GONE
+                                    }
+                            }
                         } else {
-                            Toast.makeText(this@MainActivity, "Adding the profile picture failed : ${pictureUploadTask}", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(this@MainActivity, "Uploading the profile picture failed : ${pictureUploadTask}", Toast.LENGTH_SHORT).show()
                             val user = User(
                                 username,
                                 "",
@@ -281,5 +285,6 @@ class MainActivity : AppCompatActivity() {
 
     private fun sendToActivity(){
         startActivity(Intent(this@MainActivity, ChatActivity::class.java))
+        finish()
     }
 }

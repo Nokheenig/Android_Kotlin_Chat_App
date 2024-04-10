@@ -12,4 +12,5 @@
     <string name="dialog_button_no">No</string>
     <string name="type_a_message">Type a message</string>
     <string name="send_button_text">Send</string>
+    <string name="sign_out_button_text">Sign out</string>
 </resources>

@@ -44,36 +44,10 @@ class MessagesAdaptor (
             holder.textViewMessage.text = message.message
         } else if (holder is SenderViewHolder) {
             holder.textViewSender.text = message.message
-            //if (message.sender.profileImage.isEmpty()){
-            //    holder.senderProfileImage.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_profile))
-            //} else {
-            /*
-            val imagePath = if(message.sender.profileImage.isEmpty()) null else message.sender.profileImage
-            val storageRef : StorageReference = FirebaseStorage.getInstance().reference
-            val imageRef = storageRef.child(imagePath!!)
-            imageRef.downloadUrl.addOnSuccessListener { taskUri ->
-                Log.d("test", "banana ${taskUri}")
-                Toast.makeText(context, "banana ${taskUri}", Toast.LENGTH_SHORT).show()
-                Picasso.get()
-                    .load(taskUri)
-                    .placeholder(R.drawable.ic_profile)
-                    .into(holder.senderProfileImage)
-            }.addOnFailureListener {
-                Picasso.get()
-                    .load(imagePath.toString())
-                    .placeholder(R.drawable.ic_profile)
-                    .into(holder.senderProfileImage)
-            }
-             */
-
-
-            //}
             if (message.sender.profileImage.isEmpty()){
                 //holder.senderProfileImage.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_profile))
                 holder.senderProfileImage.setImageResource(R.drawable.ic_profile)
             } else {
-                Log.d("test", "Image Uri ${message.sender.profileImage}")
-                Toast.makeText(context, "Image Uri ${message.sender.profileImage}", Toast.LENGTH_SHORT).show()
                 Picasso.get()
                     .load(message.sender.profileImage)
                     .placeholder(R.drawable.ic_profile)

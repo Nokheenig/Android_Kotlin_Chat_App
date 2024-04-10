@@ -1,12 +1,16 @@
 package com.example.chatapp.ui
 
+import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.view.Menu
+import android.view.MenuItem
 import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.example.chatapp.MainActivity
 import com.example.chatapp.R
 import com.example.chatapp.adaptors.MessagesAdaptor
 import com.example.chatapp.model.ChatMessage
@@ -63,7 +67,7 @@ class ChatActivity : AppCompatActivity() {
                         DocumentChange.Type.ADDED -> {
                             val snapshot = dc.document
                             val message = snapshot.toObject(ChatMessage::class.java)
-                            messages.add(message)
+                            messages.add(newIndex, message)
                             messagesAdaptor.notifyItemInserted(newIndex) // <- This is gonna add an animation whenever we add a new message
                         }
                         DocumentChange.Type.REMOVED -> {
@@ -109,5 +113,23 @@ class ChatActivity : AppCompatActivity() {
                 }
             // Here we don't have to add onSuccessListener and onFailure Listener because we will see directly in the UI if inserting the message succeeded  or not
         }
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        menuInflater.inflate(R.menu.chat_menu, menu)
+        return true
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        when(item.itemId){
+            R.id.item_sign_out -> {
+                FirebaseAuth.getInstance().signOut()
+                Intent(this@ChatActivity, MainActivity::class.java).also {
+                    startActivity(it)
+                }
+                return true
+            }
+        }
+        return false
     }
 }
