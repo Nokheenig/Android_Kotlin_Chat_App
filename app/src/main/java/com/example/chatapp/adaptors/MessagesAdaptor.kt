@@ -5,6 +5,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.core.content.ContextCompat
@@ -25,9 +26,19 @@ class MessagesAdaptor (
 
     private val RECEIVER_TYPE_HOLDER = 1
     private val SENDER_TYPE_HOLDER = 2
+    private val  IMAGE_TYPE_HOLDER_ME = 3
+    private val  IMAGE_TYPE_HOLDER_SENDER = 4
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
-        return  if (viewType == RECEIVER_TYPE_HOLDER){
+        return  if (viewType == IMAGE_TYPE_HOLDER_ME) {
+            ImageHolderMe(
+                LayoutInflater.from(context).inflate(R.layout.me_image,parent,false)
+            )
+        } else if (viewType == IMAGE_TYPE_HOLDER_SENDER) {
+            ImageHolderSender(
+                LayoutInflater.from(context).inflate(R.layout.sender_image, parent,false)
+            )
+        } else if (viewType == RECEIVER_TYPE_HOLDER) {
             MeViewHolder(
                 LayoutInflater.from(context).inflate(R.layout.me, parent, false)
             )
@@ -40,12 +51,19 @@ class MessagesAdaptor (
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         val message = messages[position]
-        if (holder is MeViewHolder) {
-            holder.textViewMessage.text = message.message
-        } else if (holder is SenderViewHolder) {
-            holder.textViewSender.text = message.message
+        if (holder is ImageHolderMe) {
+            if (message.image.isEmpty()){
+                Toast.makeText(context, "No image", Toast.LENGTH_LONG).show()
+            } else {
+                Picasso.get()
+                    .load(message.image)
+                    .placeholder(R.drawable.chat_app)
+                    .into(holder.meImage)
+            }
+        }else if (holder is ImageHolderSender) {
+            //holder.textViewSender.text = message.message
+            holder.textViewSenderUsername.text = message.sender.name
             if (message.sender.profileImage.isEmpty()){
-                //holder.senderProfileImage.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_profile))
                 holder.senderProfileImage.setImageResource(R.drawable.ic_profile)
             } else {
                 Picasso.get()
@@ -53,9 +71,29 @@ class MessagesAdaptor (
                     .placeholder(R.drawable.ic_profile)
                     .into(holder.senderProfileImage)
             }
+            if (message.image.isEmpty()){
+                Toast.makeText(context, "No image", Toast.LENGTH_LONG).show()
+            } else {
+                Picasso.get()
+                    .load(message.image)
+                    .placeholder(R.drawable.chat_app)
+                    .into(holder.senderImage)
+            }
 
-        } else {
 
+        } else if (holder is MeViewHolder) {
+            holder.textViewMessage.text = message.message
+        } else if (holder is SenderViewHolder) {
+            holder.textViewSender.text = message.message
+            holder.textViewSenderUsername.text = message.sender.name
+            if (message.sender.profileImage.isEmpty()){
+                holder.senderProfileImage.setImageResource(R.drawable.ic_profile)
+            } else {
+                Picasso.get()
+                    .load(message.sender.profileImage)
+                    .placeholder(R.drawable.ic_profile)
+                    .into(holder.senderProfileImage)
+            }
         }
     }
 
@@ -65,8 +103,11 @@ class MessagesAdaptor (
 
     override fun getItemViewType(position: Int): Int {
         val message = messages[position]
-        return if (FirebaseAuth.getInstance().currentUser?.uid == message.sender.id){
-            // The id of the message and the id of the person who is currently logged in are the same
+        return if (FirebaseAuth.getInstance().currentUser?.uid == message.sender.id && message.image.isNotEmpty()) {
+            IMAGE_TYPE_HOLDER_ME
+        } else if (FirebaseAuth.getInstance().currentUser?.uid != message.sender.id && message.image.isNotEmpty()) {
+            IMAGE_TYPE_HOLDER_SENDER
+        } else if (FirebaseAuth.getInstance().currentUser?.uid == message.sender.id) {
             RECEIVER_TYPE_HOLDER
         } else {
             SENDER_TYPE_HOLDER
@@ -80,5 +121,16 @@ class MessagesAdaptor (
     inner class  SenderViewHolder(view: View): RecyclerView.ViewHolder(view) {
         val textViewSender: TextView = view.findViewById(R.id.text_view_sender)
         val senderProfileImage: CircularImageView = view.findViewById(R.id.sender_profile_image)
+        val textViewSenderUsername: TextView = view.findViewById(R.id.sender_username)
+    }
+
+    inner class ImageHolderMe(view: View) : RecyclerView.ViewHolder(view) {
+        val meImage: ImageView = view.findViewById(R.id.me_image)
+    }
+
+    inner class ImageHolderSender(view: View) : RecyclerView.ViewHolder(view) {
+        val senderImage: ImageView = view.findViewById(R.id.sender_image)
+        val senderProfileImage: CircularImageView = view.findViewById(R.id.sender_profile_image)
+        val textViewSenderUsername: TextView = view.findViewById(R.id.sender_username)
     }
 }

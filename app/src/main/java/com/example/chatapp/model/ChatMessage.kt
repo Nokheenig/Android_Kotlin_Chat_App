@@ -6,7 +6,11 @@ import java.util.Date
 class ChatMessage (
     val sender: User,
     val message: String,
-    @ServerTimestamp val timeStamp: Date? = null
+    val image: String = "",
+    @ServerTimestamp val timeStamp: Date? = null,
 ){
-    constructor(): this(User(), "", null)
+    constructor(): this(User(), "",  "", null)
+
+    constructor(image: String): this(User(), "", image, null)
+    constructor(image: String, user: User ): this(user, "", image, null)
 }

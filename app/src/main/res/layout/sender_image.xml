@@ -40,14 +40,12 @@
 
         </androidx.appcompat.widget.LinearLayoutCompat>
 
-        <TextView android:id="@+id/text_view_sender"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textSize="30sp"
-            android:background="@drawable/sender"
-            android:text="How are you? qweirwoieurpqowiu  qwepoiru poiu poiuqw pweoiqru opiwuqe rwqerpo iu"
-            android:padding="10dp"
-            android:textColor="@android:color/white"/>
+
+
+        <ImageView android:id="@+id/sender_image"
+            android:layout_width="200dp"
+            android:layout_height="200dp"
+            android:src="@drawable/chat_app"/>
 
     </androidx.appcompat.widget.LinearLayoutCompat>
 
