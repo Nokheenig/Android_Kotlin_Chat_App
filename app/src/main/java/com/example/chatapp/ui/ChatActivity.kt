@@ -1,6 +1,7 @@
 package com.example.chatapp.ui
 
 import android.annotation.SuppressLint
+import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
@@ -180,9 +181,21 @@ class ChatActivity : AppCompatActivity() {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
             R.id.item_sign_out -> {
+                /*
+        we made this shared preference pref. in splash screens and stored a value which was false at that time
+        and key wa isLoggedIn and here I am putting the value false which will go to splash screen
+        and again perform a check whether the value is true of false for furthur check.
+         */
+                val pref = getSharedPreferences("login", Context.MODE_PRIVATE)
+                val editor = pref.edit()
+                editor.putBoolean("isLoggedIn", false)
+                editor.apply()
+
                 FirebaseAuth.getInstance().signOut()
                 Intent(this@ChatActivity, MainActivity::class.java).also {
+                    it.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK) // Added with Splashscreen : necessary ?
                     startActivity(it)
+                    finish()
                 }
                 return true
             }
