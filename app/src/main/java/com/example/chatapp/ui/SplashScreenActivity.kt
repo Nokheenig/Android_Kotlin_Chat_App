@@ -9,25 +9,30 @@ import android.os.Looper
 import androidx.core.os.postDelayed
 import com.example.chatapp.MainActivity
 import com.example.chatapp.R
+import com.google.firebase.auth.FirebaseAuth
 
 class SplashScreenActivity : AppCompatActivity() {
+    private lateinit var auth: FirebaseAuth
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_splash_screen)
-        Handler(Looper.getMainLooper()).postDelayed(1800) {
-            ////////////////////////////////////////////////////////////////////////////////////////////////
-            /*
-            shared preference code for keeping users logged IN.
-            shared preferences are local data storage system to store data with key and value.
-             */
-            val pref = getSharedPreferences("logIn", Context.MODE_PRIVATE)
-            val isLoggedIn = pref.getBoolean("isLoggedIn", false)
-            ////////////////////////////////////////////////////////////////////////////////////////////////
 
-            //Decide whether to start LogInPage or HomePage as per the user logIn status
-            val targetActivity = if (isLoggedIn) ChatActivity::class.java else MainActivity::class.java
-            startActivity(Intent(this, targetActivity))
-            finish()
+        Handler(Looper.getMainLooper()).postDelayed(1800) {
+
+            auth = FirebaseAuth.getInstance()
+
+            auth.addAuthStateListener { firebaseAuth ->
+                val user = firebaseAuth.currentUser
+                val targetActivity = if (user != null) {
+                    // User is signed in.
+                    ChatActivity::class.java
+                } else {
+                    // User is signed out.
+                    MainActivity::class.java
+                }
+                startActivity(Intent(this, targetActivity))
+                finish()
+            }
         }
     }
 }

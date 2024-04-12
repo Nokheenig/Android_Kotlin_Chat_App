@@ -87,14 +87,6 @@ class MainActivity : AppCompatActivity() {
         FirebaseAuth.getInstance().signInWithEmailAndPassword(email,password)
             .addOnCompleteListener(this){task ->
                 if (task.isSuccessful) {
-                    ///////////////////////////////////////////////////////////////////////////
-                    //check for the user whether they already loggedIn or not
-                    val pref = getSharedPreferences("logIn", Context.MODE_PRIVATE)
-                    val editor = pref.edit()
-                    editor.putBoolean("isLoggedIn", true)
-                    editor.apply()
-                    ///////////////////////////////////////////////////////////////////////////
-
 
                     //normal messages and intent codes
                     Toast.makeText(this, "User signed in", Toast.LENGTH_LONG).show()
