@@ -7,6 +7,7 @@ import android.content.pm.PackageManager
 import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.MotionEvent
@@ -51,6 +52,7 @@ class ChatActivity : AppCompatActivity() {
     private lateinit var getResult: ActivityResultLauncher<Intent>
     private lateinit var progressBar: ProgressBar
     private val STORAGE_REQUEST_CODE = 34234
+    private var lastListenerDocument: String? = null
     @SuppressLint("ClickableViewAccessibility")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -113,14 +115,24 @@ class ChatActivity : AppCompatActivity() {
                 }
                 snapshots?.let {
                     for (dc in it.documentChanges) {
+                        if (lastListenerDocument != null){
+                            if (dc.document.id == lastListenerDocument){
+                                continue
+                            }
+                        }
+                        lastListenerDocument = dc.document.id
+
                         // Because we need indexes in order to add animations:
                         val oldIndex = dc.oldIndex
                         val newIndex = dc.newIndex
 
                         when (dc.type) {
                             DocumentChange.Type.ADDED -> {
+                                Log.d("duplicateTest","New document added to Firestore: ${dc.document.id}\nContent:\n${dc.document.data}")
                                 val snapshot = dc.document
                                 val message = snapshot.toObject(ChatMessage::class.java)
+                                message.messageId = snapshot.id
+
                                 messages.add(newIndex, message)
                                 messagesAdaptor.notifyItemInserted(newIndex) // <- This is gonna add an animation whenever we add a new message
                                 //messagesAdaptor.notifyDataSetChanged()
@@ -241,7 +253,7 @@ class ChatActivity : AppCompatActivity() {
                     Toast.makeText(this@ChatActivity, "Failed to upload the image: ${imageUploadTask}", Toast.LENGTH_LONG).show()
                 } else {
                     // Image successfully uploaded
-                    Toast.makeText(this@ChatActivity, "Image uploaded successfully", Toast.LENGTH_LONG).show()
+                    //Toast.makeText(this@ChatActivity, "Image uploaded successfully", Toast.LENGTH_LONG).show()
                     imageUploadTask.result.storage.downloadUrl.addOnCompleteListener {
                         val imageUrl = if (it.isSuccessful) {
                             // Image downloadUrl successfully retrieved
@@ -250,7 +262,7 @@ class ChatActivity : AppCompatActivity() {
                             ""
                         }
 
-                        Toast.makeText(this@ChatActivity, it.toString(), Toast.LENGTH_SHORT).show()
+                        //Toast.makeText(this@ChatActivity, it.toString(), Toast.LENGTH_SHORT).show()
                         val message = ChatMessage(
                             imageUrl,
                             currentUser
@@ -259,7 +271,7 @@ class ChatActivity : AppCompatActivity() {
                             .set(message)
                             .addOnCompleteListener {
                                 if (it.isSuccessful){
-                                    Toast.makeText(this, "Image message was successfully added in database!", Toast.LENGTH_SHORT).show()
+                                    //Toast.makeText(this, "Image message was successfully added in database!", Toast.LENGTH_SHORT).show()
                                 } else {
                                     Toast.makeText(this, "Image message failed to insert in database !", Toast.LENGTH_SHORT).show()
                                 }

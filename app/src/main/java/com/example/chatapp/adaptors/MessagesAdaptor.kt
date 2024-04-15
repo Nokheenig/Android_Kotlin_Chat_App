@@ -31,6 +31,20 @@ class MessagesAdaptor (
     private val SENDER_TYPE_HOLDER = 2
     private val  IMAGE_TYPE_HOLDER_ME = 3
     private val  IMAGE_TYPE_HOLDER_SENDER = 4
+    private val itemIds: MutableList<String> = mutableListOf()
+
+    init {
+        setHasStableIds(true)
+    }
+
+    //override fun getItemId(position: Int): Long = position.toLong()
+    override fun getItemId(position: Int): Long {
+        val dbId = messages[position].messageId!!
+        if (itemIds.indexOf(dbId) == -1){
+            itemIds.add(dbId)
+        }
+        return itemIds.indexOf(dbId).toLong()
+    }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         return  if (viewType == IMAGE_TYPE_HOLDER_ME) {
@@ -56,7 +70,8 @@ class MessagesAdaptor (
         val message = messages[position]
         if (holder is ImageHolderMe) {
             if (message.image.isEmpty()){
-                Toast.makeText(context, "No image", Toast.LENGTH_LONG).show()
+                //Toast.makeText(context, "No image", Toast.LENGTH_LONG).show()
+                holder.meImage.setImageResource(R.drawable.chat_app)
             } else {
                 Picasso.get()
                     .load(message.image)
@@ -105,7 +120,8 @@ class MessagesAdaptor (
                     })
             }
             if (message.image.isEmpty()){
-                Toast.makeText(context, "No image", Toast.LENGTH_LONG).show()
+                //Toast.makeText(context, "No image", Toast.LENGTH_LONG).show()
+                holder.senderImage.setImageResource(R.drawable.chat_app)
             } else {
                 Picasso.get()
                     .load(message.image)
