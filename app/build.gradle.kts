@@ -55,5 +55,6 @@ dependencies {
     androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
     implementation("com.mikhaellopez:circularimageview:4.3.1")
     implementation("com.squareup.picasso:picasso:2.8")
+    implementation("com.squareup.okhttp3:okhttp:4.12.0")
     implementation("com.airbnb.android:lottie:5.2.0")
 }

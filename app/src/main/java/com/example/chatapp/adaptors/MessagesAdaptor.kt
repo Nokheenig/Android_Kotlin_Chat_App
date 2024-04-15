@@ -17,7 +17,10 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.StorageReference
 import com.mikhaellopez.circularimageview.CircularImageView
+import com.squareup.picasso.Callback
+import com.squareup.picasso.NetworkPolicy
 import com.squareup.picasso.Picasso
+import java.lang.Exception
 
 class MessagesAdaptor (
     private val context: Context,
@@ -57,8 +60,23 @@ class MessagesAdaptor (
             } else {
                 Picasso.get()
                     .load(message.image)
+                    .networkPolicy(NetworkPolicy.OFFLINE)
                     .placeholder(R.drawable.chat_app)
-                    .into(holder.meImage)
+                    .into(holder.meImage, object : Callback{
+                        override fun onSuccess() { }
+                        override fun onError(e: Exception?) {
+                            //Try again online if cache failed
+                            Picasso.get()
+                                .load(message.image)
+                                .placeholder(R.drawable.chat_app)
+                                .into(holder.meImage, object : Callback{
+                                    override fun onSuccess() { }
+                                    override fun onError(e: Exception?) {
+                                        Log.v("Picasso", "Could not fetch image :'(")
+                                    }
+                                })
+                        }
+                    })
             }
         }else if (holder is ImageHolderSender) {
             //holder.textViewSender.text = message.message
@@ -68,16 +86,46 @@ class MessagesAdaptor (
             } else {
                 Picasso.get()
                     .load(message.sender.profileImage)
+                    .networkPolicy(NetworkPolicy.OFFLINE)
                     .placeholder(R.drawable.ic_profile)
-                    .into(holder.senderProfileImage)
+                    .into(holder.senderProfileImage, object : Callback{
+                        override fun onSuccess() { }
+                        override fun onError(e: Exception?) {
+                            //Try again online if cache failed
+                            Picasso.get()
+                                .load(message.sender.profileImage)
+                                .placeholder(R.drawable.ic_profile)
+                                .into(holder.senderProfileImage, object : Callback{
+                                    override fun onSuccess() { }
+                                    override fun onError(e: Exception?) {
+                                        Log.v("Picasso", "Could not fetch image :'(")
+                                    }
+                                })
+                        }
+                    })
             }
             if (message.image.isEmpty()){
                 Toast.makeText(context, "No image", Toast.LENGTH_LONG).show()
             } else {
                 Picasso.get()
                     .load(message.image)
+                    .networkPolicy(NetworkPolicy.OFFLINE)
                     .placeholder(R.drawable.chat_app)
-                    .into(holder.senderImage)
+                    .into(holder.senderImage, object : Callback{
+                        override fun onSuccess() { }
+                        override fun onError(e: Exception?) {
+                            //Try again online if cache failed
+                            Picasso.get()
+                                .load(message.image)
+                                .placeholder(R.drawable.chat_app)
+                                .into(holder.senderImage, object : Callback{
+                                    override fun onSuccess() { }
+                                    override fun onError(e: Exception?) {
+                                        Log.v("Picasso", "Could not fetch image :'(")
+                                    }
+                                })
+                        }
+                    })
             }
 
 
@@ -91,8 +139,23 @@ class MessagesAdaptor (
             } else {
                 Picasso.get()
                     .load(message.sender.profileImage)
+                    .networkPolicy(NetworkPolicy.OFFLINE)
                     .placeholder(R.drawable.ic_profile)
-                    .into(holder.senderProfileImage)
+                    .into(holder.senderProfileImage, object : Callback{
+                        override fun onSuccess() { }
+                        override fun onError(e: Exception?) {
+                            //Try again online if cache failed
+                            Picasso.get()
+                                .load(message.sender.profileImage)
+                                .placeholder(R.drawable.ic_profile)
+                                .into(holder.senderProfileImage, object : Callback{
+                                    override fun onSuccess() { }
+                                    override fun onError(e: Exception?) {
+                                        Log.v("Picasso", "Could not fetch image :'(")
+                                    }
+                                })
+                        }
+                    })
             }
         }
     }
