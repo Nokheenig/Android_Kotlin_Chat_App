@@ -235,6 +235,21 @@ class ChatActivity : AppCompatActivity() {
         }
     }
 
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (requestCode == STORAGE_REQUEST_CODE && grantResults.size > 0
+            && grantResults[0] == PackageManager.PERMISSION_GRANTED
+        ) {
+            getImage()
+        } else {
+            Toast.makeText(this@ChatActivity, "Permission not granted", Toast.LENGTH_LONG).show()
+        }
+    }
+
     private fun getImage(){
         val intent = Intent(Intent.ACTION_PICK)
         intent.type = "image/*"

@@ -279,7 +279,9 @@ class MainActivity : AppCompatActivity() {
         grantResults: IntArray
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        if (requestCode == STORAGE_REQUEST_CODE && grantResults.size > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED){
+        if (requestCode == STORAGE_REQUEST_CODE && grantResults.size > 0
+            && grantResults[0] == PackageManager.PERMISSION_GRANTED
+        ) {
             getImage()
         } else {
             Toast.makeText(this@MainActivity, "Permission not granted", Toast.LENGTH_LONG).show()
