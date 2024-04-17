@@ -29,8 +29,8 @@ class MessagesAdaptor (
 
     private val RECEIVER_TYPE_HOLDER = 1
     private val SENDER_TYPE_HOLDER = 2
-    private val  IMAGE_TYPE_HOLDER_ME = 3
-    private val  IMAGE_TYPE_HOLDER_SENDER = 4
+    private val IMAGE_TYPE_HOLDER_ME = 3
+    private val IMAGE_TYPE_HOLDER_SENDER = 4
     private val itemIds: MutableList<String> = mutableListOf()
 
     init {
@@ -44,6 +44,10 @@ class MessagesAdaptor (
             itemIds.add(dbId)
         }
         return itemIds.indexOf(dbId).toLong()
+    }
+
+    fun isNewMessage(messageDbId: String): Boolean {
+        return messageDbId !in itemIds
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
